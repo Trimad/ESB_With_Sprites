@@ -1,3 +1,5 @@
+"use strict"
+
 var food = [];
 var poison = [];
 var flowers = [];
@@ -37,28 +39,21 @@ function drawEdibles() {
 
 function spawnEdibles() {
 
-//Spawn Food
+  let x = floor(random(1, rows-1));
+  let y = floor(random(1, cols-1));
 
+  //Spawn Food
   if (Math.random(1) < 0.1 && food.length < 512) {
-
-    var x = floor(random(rows));
-    var y = floor(random(cols));
-
     if (grid[x][y].b === 0 && grid[x][y].r !== 76) {
       food.push(createVector(x * cellSize, y * cellSize));
     }
   }
-  
+
   //Spawn Poison
-  
-    if (Math.random(1) < 0.1 && poison.length < 256) {
-
-    var x = floor(random(rows));
-    var y = floor(random(cols));
-
+  if (Math.random(1) < 0.1 && poison.length < 256) {
     if (grid[x][y].b === 0 && grid[x][y].r !== 76) {
       poison.push(createVector(x * cellSize, y * cellSize));
     }
   }
-  
+
 }

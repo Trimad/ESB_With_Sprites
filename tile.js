@@ -1,11 +1,13 @@
+"use strict"
+
 var grid = [];
+
+//Perlin Noise
 var inc = 0.1;
 
-function Tile(x, y, size, r, g, b, a) {
+function Tile(x, y, r, g, b, a) {
 
   this.position = createVector(x, y);
-  this.z = 0;
-  this.size = size;
 
   this.r = r;
   this.g = g;
@@ -14,41 +16,58 @@ function Tile(x, y, size, r, g, b, a) {
   this.originalG = g;
   this.originalR = r;
 
-  this.regrow = function() {
+  this.brown = function() {
 
-    if (this.g < this.originalG || this.r > this.originalR) {
+    if (frameCount % 30 === 0) {
 
-      this.g = this.g + floor(randColor(5));
-      this.r = this.r - floor(randColor(5));
+      this.r += 1;
+      this.g -= 1;
 
+    }
+  }
+
+  this.intersects = function(other, d) {
+
+    if (dist(this.position.x, this.position.y, other.position.x, other.position.y) < d) {
+      return true;
+    } else {
+      return false;
     }
 
   }
 
-  this.intersects = function(other) {
+  this.regrow = function() {
+    if (frameCount % 240 === 0) {
+      if (this.r > this.originalR) {
+        this.r -= 1;
 
+      }
+      if (this.g < this.originalG) {
+        this.g += 1;
+
+      }
+    }
   }
 
   this.render = function() {
-
+    
+        //Grass
+        if (this.r === 0 && this.b === 0) {
+          image(grass, this.position.x, this.position.y, cellSize, cellSize);
+        }
+        //Water
+        else if (this.b !== 0) {
+          image(water, this.position.x, this.position.y, cellSize, cellSize);
+        }
+        //Dirt
+        else if (this.r == 76 && this.b == 0) {
+          image(dirt, this.position.x, this.position.y, cellSize, cellSize);
+        }
+      
+    //Tint
     fill(this.r, this.g, this.b, this.a);
-
     noStroke();
-    
-    
-    //Grass
-    if (this.r === 0 && this.b === 0) {
-      image(grass, this.position.x, this.position.y, this.size, this.size);
-    }
-    //Water
-    else if (this.b !== 0) {
-      image(water, this.position.x, this.position.y, this.size, this.size);
-    }
-    //Dirt
-    else if (this.r == 76 && this.b == 0) {
-      image(dirt, this.position.x, this.position.y, this.size, this.size);
-    }
-    rect(this.position.x, this.position.y, this.size, this.size);
+    rect(this.position.x, this.position.y, cellSize, cellSize);
 
   }
 
@@ -85,14 +104,14 @@ function make2Darray() {
         r = 0;
         g = randColor;
         b = 0;
-        a = 150;
+        a = 100;
       }
       //Draw sand
       else if (randColor < 75 && randColor > 65) {
         r = 76;
         g = randColor;
         b = 0;
-        a = 150;
+        a = 100;
       }
       //Draw water
       else if (randColor <= 65) {
@@ -105,7 +124,7 @@ function make2Darray() {
       var x = i * cellSize;
       var y = j * cellSize;
 
-      grid[i][j] = new Tile(x, y, cellSize, r, g, b, a);
+      grid[i][j] = new Tile(x, y, r, g, b, a);
 
     }
     yOff += inc;

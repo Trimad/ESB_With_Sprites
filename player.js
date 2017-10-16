@@ -1,3 +1,5 @@
+"use strict"
+
 var mutationRate = 0.5;
 
 function Player(spawnX, spawnY, ID, dna) {
@@ -7,18 +9,30 @@ function Player(spawnX, spawnY, ID, dna) {
   this.velocity = createVector(0, -2);
   this.position = createVector(spawnX, spawnY);
 
+  //Everything else
+  this.ID = ID;
+  this.isSelected = false;
+  this.hunger = 100;
+  this.thirst = 0;
   this.dna = [];
+
   if (dna === undefined) {
+
     // Food weight
     this.dna[0] = random(0, 5);
+
     // Poison weight
     this.dna[1] = random(0, 5);
+
     // Food perception
     this.dna[2] = random(0, 400);
+
     // Poision Percepton
     this.dna[3] = random(0, 400);
+
     //Maximum speed
     this.dna[4] = 5;
+
     //Maximum force
     this.dna[5] = 1;
 
@@ -50,11 +64,6 @@ function Player(spawnX, spawnY, ID, dna) {
       this.dna[5] += random(-0.5, 0.5);
     }
   }
-  //Everything else
-  this.ID = ID;
-  this.isSelected = false;
-  this.hunger = 100;
-  this.thirst = 0;
 
   this.applyForce = function(force) {
     // We could add mass here if we want A = F / M
@@ -82,10 +91,10 @@ function Player(spawnX, spawnY, ID, dna) {
   }
 
   this.eat = function(list, nutrition, perception) {
-    var record = Infinity;
-    var closest = null;
+    let record = Infinity;
+    let closest = null;
     for (var i = list.length - 1; i >= 0; i--) {
-      var d = this.position.dist(list[i]);
+      let d = this.position.dist(list[i]);
 
       if (d < this.dna[4]) {
         list.splice(i, 1);
@@ -108,7 +117,7 @@ function Player(spawnX, spawnY, ID, dna) {
   }
 
   this.dead = function() {
-    return (this.hunger < 0);
+    return (this.hunger <= 0);
   }
 
   this.display = function() {
@@ -135,32 +144,17 @@ function Player(spawnX, spawnY, ID, dna) {
 
   this.edges = function() {
 
-    //Firstly, ensure that the player never exits the map.
+    let desired = null;
 
-    if (this.position.x < 0)
-      this.position.x = 0;
-    if (this.position.y < 0)
-      this.position.y = 0;
-    if (this.position.x > rows * cellSize - cellSize)
-      this.position.x = rows * cellSize - cellSize;
-    if (this.position.y > cols * cellSize - cellSize)
-      this.position.y = cols * cellSize - cellSize;
-
-    //Secondly, give them a new vector in the opposite direction.
-
-    var d = cellSize;
-
-    var desired = null;
-
-    if (this.position.x < d) {
+    if (this.position.x < cellSize) {
       desired = createVector(this.dna[4], this.velocity.x);
-    } else if (this.position.x > width - d) {
+    } else if (this.position.x > rows * cellSize - cellSize) {
       desired = createVector(-this.dna[4], this.velocity.x);
     }
 
-    if (this.position.y < d) {
+    if (this.position.y < cellSize) {
       desired = createVector(this.velocity.y, this.dna[4]);
-    } else if (this.position.y > height - d) {
+    } else if (this.position.y > cols * cellSize - cellSize) {
       desired = createVector(this.velocity.y, -this.dna[4]);
     }
 
@@ -198,15 +192,13 @@ function Player(spawnX, spawnY, ID, dna) {
 
   }
 
-  this.intersects = function(other) {
+  this.intersects = function(other, d) {
 
-    var d = dist(this.position.x, this.position.y, other.position.x, other.position.y);
-
-    if (d < cellSize / 4) {
-      this.velocity.x = this.velocity.x * -this.dna[5];
-      this.velocity.y = this.velocity.y * -this.dna[5];
+    if (dist(this.position.x, this.position.y, other.position.x, other.position.y) < d) {
+      return true;
+    } else {
+      return false;
     }
-
 
   }
 
@@ -299,7 +291,7 @@ function Player(spawnX, spawnY, ID, dna) {
     if (directionInDegrees < 315 && directionInDegrees > 225) {
       if (frameCount % 30 < 10) {
         image(playerSpriteSheet, this.position.x, this.position.y, playerSize, playerSize, sx + 0, sy + sh * 3, sw, sh);
-        
+
       }
       if (frameCount % 30 >= 10 && frameCount % 30 < 20) {
 
@@ -362,24 +354,6 @@ function Player(spawnX, spawnY, ID, dna) {
 
   }
 
-  this.tread = function(tile) {
-
-    var d = dist(this.position.x, this.position.y + cellSize / 2, tile.position.x, tile.position.y);
-
-    if (d < playerSize / 4) {
-      if (tile.r < 255) {
-        tile.r++;
-        tile.a = 50;
-      }
-      if (tile.g > 100) {
-        tile.g--;
-        tile.a = 50;
-      }
-
-    }
-
-  }
-
   this.update = function() {
 
     this.hunger -= 0.1;
@@ -391,12 +365,6 @@ function Player(spawnX, spawnY, ID, dna) {
     this.position.add(this.velocity);
     // Reset accelerationelertion to 0 each cycle
     this.acceleration.mult(0);
-  }
-
-  this.write = function(stat, value) {
-
-    stat = value;
-
   }
 
 }

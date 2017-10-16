@@ -28,9 +28,7 @@ function mousePressed() {
     
   }
 
-
 }
-
 
 function mouseReleased() {
 
@@ -38,6 +36,7 @@ function mouseReleased() {
   selectObj();
 
 }
+
 
 function selectObj() {
 

@@ -1,90 +1,87 @@
-var canvas;
-var debug;
-var data;
+"use strict"
 
-var stats;
+let npcSprites = [];
+let playerSprites = [];
+let doodad = [];
+let player = [];
 
-var npcSprites = [];
-var playerSprites = [];
-var doodad = [];
-var player = [];
-var tentacles = [];
+let drawDistance;
+let cols = 32;
+let rows = 32;
+let cellSize = 128;
+let playerSize = cellSize;
+let treeSize = cellSize * 3;
+let edibleSize = playerSize;
 
-var drawDistance;
-var cols = 32;
-var rows = 32;
-var cellSize = 128;
-var playerSize = cellSize;
-var treeSize = cellSize * 3;
-var edibleSize = playerSize;
-
-var numPlayers = 8;
+let numPlayers = 8;
 
 function setup() {
 
-  //JSON stuff
-  stats = data.tristan;
-
   //Canvas stuff
-  drawDistance = windowHeight;
-  canvas = createCanvas(windowWidth, windowHeight);
-  canvas.parent('sketch-holder');
+
+  createCanvas(windowWidth, windowHeight);
+  if (height > width) {
+    drawDistance = height / 2;
+
+  } else if (width > height) {
+    drawDistance = width / 2;
+  }
+
   pixelDensity(1);
   imageMode(CENTER);
   rectMode(CENTER);
-  noSmooth();
-  
+  //noSmooth();
+
   //Spawn stuff into the world
   make2Darray();
   spawnTrees();
   spawnPlayers();
 
-  debug = createCheckbox();
-  debug.parent('debugbox');
-
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  drawDistance = windowWidth / 2;
+  if (height > width) {
+    drawDistance = height / 2;
+
+  } else if (width > height) {
+    drawDistance = width / 2;
+  }
 }
 
 function draw() {
 
-  background(51);
-
-  GUI();
-
+  background(0);
   translate(-player[0].position.x + width / 2, -player[0].position.y + height / 2);
   //translate(cameraX, cameraY);
   //camera();
 
   //Draw tiles
+  let xRadius = drawDistance / cellSize;
+  let leftBoundary = constrain(floor(((player[0].position.x / cellSize) - xRadius)), 0, rows);
+  let rightBoundary = constrain(floor(((player[0].position.x / cellSize) + xRadius + 2)), 0, rows);
 
-  for (var i = 0; i < rows; i++) {
+  let yRadius = drawDistance / cellSize;
+  let topBoundary = constrain(floor(((player[0].position.y / cellSize) - yRadius)), 0, cols);
+  let bottomBoundary = constrain(floor(((player[0].position.y / cellSize) + yRadius + 2)), 0, cols);
 
-    for (var j = 0; j < cols; j++) {
+  for (let i = leftBoundary; i < rightBoundary; i++) {
 
-      drawWithinDistance(player[0], grid[i][j]);
+    for (let j = topBoundary; j < bottomBoundary; j++) {
 
-      for (var p = player.length - 1; p >= 0; p--) {
+      grid[i][j].render();
 
-        if (player[p] !== undefined) {
-
-          //player[p].tread(grid[i][j]);
-
-        }
+      for (let p = player.length - 1; p >= 0; p--) {
+        /*
+                if (player[p].intersects(grid[i][j], cellSize / 2)) {
+                  grid[i][j].brown();
+                }
+        */
 
       }
 
-      //Every 60 frames, regrow the grass
-      /*
-            if (frameCount % 60 === 0) {
+      //grid[i][j].regrow();
 
-              grid[i][j].regrow();
-
-            }
-      */
     }
 
   }
@@ -96,17 +93,19 @@ function draw() {
 
   //Evolutionary Steering Behaviors
 
-  for (p = 0; p < player.length; p++) {
-    drawWithinDistance(player[0], player[p]);
+  for (let p = 0; p < player.length; p++) {
+    if (player[0].intersects(player[p], drawDistance*1.5)) {
+
+      player[p].render();
+
+    }
+
     player[p].behaviors(food, poison);
     player[p].edges();
-    if (debug.checked()) {
-      player[p].display();
-    }
     player[p].update();
 
-    if (p > 0 && player.length <= 49) {
-      var newPlayer = player[p].clone();
+    if (p > 0 && player.length <= 50) {
+      let newPlayer = player[p].clone();
       if (newPlayer !== null) {
         player.push(newPlayer);
       }
@@ -114,8 +113,8 @@ function draw() {
     }
     if (player[p].dead()) {
       /*
-            var x = player[p].position.x;
-            var y = player[p].position.y;
+            let x = player[p].position.x;
+            let y = player[p].position.y;
             food.push(createVector(x, y));
       */
       player.splice(p, 1);
@@ -123,11 +122,11 @@ function draw() {
   }
 
   //Draw doodads ontop of the player
-  for (var d = 0; d < doodad.length; d++) {
+  for (let d = 0; d < doodad.length; d++) {
 
-    //Only draw doodas within the draw distance
-    //Doodads must be drawn after players
-    drawWithinDistance(player[0], doodad[d]);
+    if (player[0].intersects(doodad[d], drawDistance*1.5)) {
+      doodad[d].render();
+    }
 
   }
 
@@ -141,16 +140,5 @@ function draw() {
   }
 
   player[0].input();
-}
-
-function drawWithinDistance(player, someObject) {
-
-  var distance = dist(player.position.x, player.position.y, someObject.position.x, someObject.position.y);
-
-  if (distance < drawDistance) {
-
-    someObject.render(player);
-
-  }
 
 }
