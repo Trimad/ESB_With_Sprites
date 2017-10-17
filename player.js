@@ -13,7 +13,7 @@ function Player(spawnX, spawnY, ID, dna) {
   this.ID = ID;
   this.isSelected = false;
   this.hunger = 100;
-  this.thirst = 0;
+  this.thirst = 51;
   this.dna = [];
 
   if (dna === undefined) {
@@ -36,9 +36,12 @@ function Player(spawnX, spawnY, ID, dna) {
     //Maximum force
     this.dna[5] = 1;
 
+    //Water perception
+    this.dna[6] = random(0, 800);
+
   } else {
 
-    // Mutation
+    //MUTATION STUFF
     this.dna[0] = dna[0];
     if (random(1) < mutationRate) {
       this.dna[0] += random(-0.5, 0.5);
@@ -63,6 +66,11 @@ function Player(spawnX, spawnY, ID, dna) {
     if (random(1) < mutationRate) {
       this.dna[5] += random(-0.5, 0.5);
     }
+    this.dna[6] = dna[6];
+    if (random(1) < mutationRate) {
+      this.dna[6] += random(-0.5, 0.5);
+    }
+
   }
 
   this.applyForce = function(force) {
@@ -70,18 +78,26 @@ function Player(spawnX, spawnY, ID, dna) {
     this.acceleration.add(force);
   }
 
-  this.behaviors = function(good, bad) {
+  this.behaviors = function(good, bad, water) {
 
-    var steerG = this.eat(good, 25, this.dna[2]);
+    var steerG = this.eat(good, 2, this.dna[2]);
     var steerB = this.eat(bad, -1, this.dna[3]);
+    var steerW = this.drink(water, this.dna[6]);
 
     steerG.mult(this.dna[0]);
     steerB.mult(this.dna[1]);
 
     this.applyForce(steerG);
     this.applyForce(steerB);
+
+    if (this.thirst > 50) {
+    steerW.mult(this.dna[6]);
+    this.applyForce(steerW);
+    }
+
   }
 
+  //REPRODUCTION
   this.clone = function() {
     if (random(1) < 0.0009) {
       return new Player(this.position.x, this.position.y, this.ID, this.dna);
@@ -116,8 +132,37 @@ function Player(spawnX, spawnY, ID, dna) {
     return createVector(0, 0);
   }
 
+  this.drink = function(list, perception) {
+
+    let record = Infinity;
+    let closest = null;
+    for (var i = list.length - 1; i >= 0; i--) {
+      let d = this.position.dist(list[i]);
+
+      if (d < this.dna[4]) {
+        
+        this.thirst =0;
+      } else {
+        if (d < record && d < perception) {
+          record = d;
+          closest = list[i];
+        }
+      }
+    }
+
+    // This is the moment of eating!
+
+    if (closest !== null) {
+      return this.seek(closest);
+    }
+
+    return createVector(0, 0);
+    
+  }
   this.dead = function() {
-    return (this.hunger <= 0);
+    
+    return (this.hunger <= 0 || this.thirst >= 100);
+    
   }
 
   this.display = function() {
@@ -161,12 +206,33 @@ function Player(spawnX, spawnY, ID, dna) {
     if (desired !== null) {
       desired.normalize();
       desired.mult(this.dna[4]);
-      var steer = p5.Vector.sub(desired, this.velocity);
+      let steer = p5.Vector.sub(desired, this.velocity);
       steer.limit(this.dna[5]);
       this.applyForce(steer);
     }
   }
 
+  this.collisionBehavior = function() {
+
+    this.velocity.x = -this.velocity.x;
+    this.velocity.y = -this.velocity.y;
+
+    /*
+        let temp2 = this.dna[2];
+        let temp3 = this.dna[3];
+
+        this.dna[2] = 0;
+        this.dna[3] = 0;
+
+        if (frameCount % 30 === 0) {
+
+          this.dna[2] = temp2;
+          this.dna[3] = temp3;
+
+        }
+        
+        */
+  }
 
   this.input = function() {
 
@@ -356,7 +422,12 @@ function Player(spawnX, spawnY, ID, dna) {
 
   this.update = function() {
 
-    this.hunger -= 0.1;
+    if (frameCount % 60 === 0) {
+
+      this.hunger--;
+      this.thirst++;
+
+    }
 
     // Update velocity
     this.velocity.add(this.acceleration);

@@ -3,11 +3,12 @@
 let npcSprites = [];
 let playerSprites = [];
 let doodad = [];
-let player = [];
+var player = [];
+let grid = [];
 
 let drawDistance;
-let cols = 32;
-let rows = 32;
+let cols = 64;
+let rows = 64;
 let cellSize = 128;
 let playerSize = cellSize;
 let treeSize = cellSize * 3;
@@ -34,8 +35,10 @@ function setup() {
 
   //Spawn stuff into the world
   make2Darray();
+  spawnFlowers();
   spawnTrees();
   spawnPlayers();
+  spawnWater();
 
 }
 
@@ -53,8 +56,6 @@ function draw() {
 
   background(0);
   translate(-player[0].position.x + width / 2, -player[0].position.y + height / 2);
-  //translate(cameraX, cameraY);
-  //camera();
 
   //Draw tiles
   let xRadius = drawDistance / cellSize;
@@ -72,12 +73,19 @@ function draw() {
       grid[i][j].render();
 
       for (let p = player.length - 1; p >= 0; p--) {
-        /*
-                if (player[p].intersects(grid[i][j], cellSize / 2)) {
-                  grid[i][j].brown();
-                }
-        */
 
+        //If player hits a water block
+        /*
+        if (player[p].intersects(grid[i][j], cellSize) && grid[i][j].b !== 0) {
+
+          if (player[p].thirst < 50) {
+
+            player[p].collisionBehavior();
+            
+          }
+        }
+
+*/
       }
 
       //grid[i][j].regrow();
@@ -87,20 +95,20 @@ function draw() {
   }
 
   //Food and Poison stuff
-
-  spawnEdibles();
+  if (food.length + poison.length < (cols * rows / 3)){
+    spawnEdibles();}
   drawEdibles();
 
   //Evolutionary Steering Behaviors
 
   for (let p = 0; p < player.length; p++) {
-    if (player[0].intersects(player[p], drawDistance*1.5)) {
+    if (player[0].intersects(player[p], drawDistance * 1.5)) {
 
       player[p].render();
 
     }
 
-    player[p].behaviors(food, poison);
+    player[p].behaviors(food, poison, wat0r);
     player[p].edges();
     player[p].update();
 
@@ -118,18 +126,19 @@ function draw() {
             food.push(createVector(x, y));
       */
       player.splice(p, 1);
+
     }
   }
 
-  //Draw doodads ontop of the player
+  //DRAW TREES AND FLOWERS
   for (let d = 0; d < doodad.length; d++) {
 
-    if (player[0].intersects(doodad[d], drawDistance*1.5)) {
+    if (player[0].intersects(doodad[d], drawDistance * 1.5)) {
       doodad[d].render();
     }
 
   }
-
+  /*
   //This is all I need in draw for the mouse controls!
 
   if (dragging) {
@@ -138,7 +147,8 @@ function draw() {
     stroke(255);
     quad(mouseStartX, mouseStartY, mouseX, mouseStartY, mouseX, mouseY, mouseStartX, mouseY);
   }
-
+*/
   player[0].input();
 
+  GUI(player[0].position.x, player[0].position.y);
 }

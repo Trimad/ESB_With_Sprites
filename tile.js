@@ -1,9 +1,7 @@
 "use strict"
 
-var grid = [];
-
 //Perlin Noise
-var inc = 0.1;
+let inc = 0.1;
 
 function Tile(x, y, r, g, b, a) {
 
@@ -50,20 +48,20 @@ function Tile(x, y, r, g, b, a) {
   }
 
   this.render = function() {
-    
-        //Grass
-        if (this.r === 0 && this.b === 0) {
-          image(grass, this.position.x, this.position.y, cellSize, cellSize);
-        }
-        //Water
-        else if (this.b !== 0) {
-          image(water, this.position.x, this.position.y, cellSize, cellSize);
-        }
-        //Dirt
-        else if (this.r == 76 && this.b == 0) {
-          image(dirt, this.position.x, this.position.y, cellSize, cellSize);
-        }
-      
+
+    //Grass
+    if (this.r === 0 && this.b === 0) {
+      image(grass, this.position.x, this.position.y, cellSize, cellSize);
+    }
+    //Water
+    else if (this.b !== 0) {
+      image(water, this.position.x, this.position.y, cellSize, cellSize);
+    }
+    //Dirt
+    else if (this.r == 76 && this.b == 0) {
+      image(dirt, this.position.x, this.position.y, cellSize, cellSize);
+    }
+
     //Tint
     fill(this.r, this.g, this.b, this.a);
     noStroke();
@@ -81,21 +79,21 @@ function make2Darray() {
 
   //Perline noise generated terrain coloration
 
-  var yOff = 0;
-  var r = 0;
-  var g = randColor;
-  var b = 0;
-  var a = 0;
+  let yOff = 0;
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let a = 0;
 
-  for (var i = 0; i < rows; i++) {
+  for (let i = 0; i < rows; i++) {
 
-    var xOff = 0;
+    let xOff = 0;
 
     grid[i] = [];
 
-    for (var j = 0; j < cols; j++) {
+    for (let j = 0; j < cols; j++) {
 
-      var randColor = noise(xOff, yOff) * 255 / 1.2;
+      let randColor = noise(xOff, yOff) * 255 / 1.2;
 
       xOff += inc;
 
@@ -121,8 +119,8 @@ function make2Darray() {
         a = 0;
       }
 
-      var x = i * cellSize;
-      var y = j * cellSize;
+      let x = i * cellSize;
+      let y = j * cellSize;
 
       grid[i][j] = new Tile(x, y, r, g, b, a);
 

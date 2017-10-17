@@ -15,11 +15,11 @@ var plantSpriteHeight = 32;
 function preload() {
 
   //Misc loaded images
-  grass = loadImage("assets/tiles/grass3.png");
-  dirt = loadImage("assets/tiles/dirt1.png");
-  water = loadImage("assets/tiles/water3.png");
+  grass = loadImage("assets/tiles/dirt3.png");
+  dirt = loadImage("assets/tiles/dirt3.png");
+  water = loadImage("assets/tiles/water1.png");
   treeSpriteSheet = loadImage("assets/plants/3.png");
-  playerSpriteSheet = loadImage("assets/player/576x384/0.png");
+  playerSpriteSheet = loadImage("assets/player/576x384/1.png");
   plantSpriteSheet = loadImage("assets/plants/2.png");
   //print(treeSpriteSheet);
 }
